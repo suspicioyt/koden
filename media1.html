@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kodeń Media</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #fff;
+            --card-bg: #1c1c1c;
+            --accent-color: #e50914;
+            --accent-hover: #f40612;
+            --secondary-bg: rgba(10, 10, 10, 0.95);
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5f5f5;
+            --text-color: #1a1a1a;
+            --card-bg: #fff;
+            --secondary-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="high-contrast"] {
+            --bg-color: #000;
+            --text-color: #fff;
+            --card-bg: #222;
+            --accent-color: #ff0;
+            --accent-hover: #cc0;
+            --secondary-bg: #111;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--secondary-bg);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .search-bar {
+            position: relative;
+        }
+
+        .search-bar input {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 0.9em;
+            width: 200px;
+            transition: width 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            width: 250px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .avatar:hover {
+            transform: rotate(10deg);
+        }
+
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            min-width: 200px;
+            z-index: 1001;
+        }
+
+        .dropdown.active {
+            display: block;
+            animation: slideIn 0.2s ease-out;
+        }
+
+        .dropdown button {
+            width: 100%;
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            text-align: left;
+            font-size: 0.95em;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .dropdown button:hover {
+            background: var(--accent-color);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(145deg, var(--bg-color) 0%, #1c1c1c 100%);
+        }
+
+        .login-box {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 12px;
+            text-align: center;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+            transition: transform 0.3s;
+        }
+
+        .login-box:hover {
+            transform: translateY(-8px);
+        }
+
+        .login-box h1 {
+            color: var(--text-color);
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            margin: 12px 0;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-size: 1em;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 0 3px var(--accent-color);
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-box button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .login-box button:disabled {
+            background: #b30710;
+            cursor: not-allowed;
+        }
+
+        .spinner {
+            display: none;
+            width: 24px;
+            height: 24px;
+            border: 4px solid #fff;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .login-box button.loading .spinner {
+            display: inline-block;
+        }
+
+        .login-box button.loading span {
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #f40612;
+            margin-top: 15px;
+            font-size: 0.9em;
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .content-container {
+            position: relative;
+            display: none;
+            padding: 80px 40px 30px;
+            min-height: 100vh;
+            transition: opacity 0.3s;
+        }
+
+        .content-container.active {
+            opacity: 1;
+        }
+
+        .content-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+        }
+
+        .content-loading.active {
+            display: flex;
+        }
+
+        .content-loading .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--accent-color);
+            border-top: 6px solid transparent;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-bar div {
+            width: 0;
+            height: 100%;
+            background: var(--accent-color);
+            transition: width 0.1s linear;
+        }
+
+        .section {
+            margin: 40px 0;
+            transition: opacity 0.3s;
+        }
+
+        .section h2 {
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .carousel-container {
+            position: relative;
+        }
+
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            padding: 20px 0;
+            gap: 20px;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+        }
+
+        .carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .carousel-nav {
+            position: absolute;
+            top: 50%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .carousel-nav button {
+            background: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: #fff;
+            font-size: 1.6em;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.3s;
+            pointer-events: auto;
+        }
+
+        .carousel-nav button:hover {
+            background: var(--accent-color);
+        }
+
+        .carousel-nav button:disabled {
+            background: rgba(0, 0, 0, 0.2);
+            cursor: not-allowed;
+        }
+
+        .item {
+            position: relative;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .item:hover {
+            transform: translateY(-12px) scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.2);
+        }
+
+        #recentlyViewedContent .item, #moviesContent .item, #musicContent .item {
+            flex: 0 0 240px;
+            height: 180px;
+            border: 4px solid #333;
+            background: linear-gradient(145deg, #222 0%, #333 100%);
+        }
+
+        #booksContent .item {
+            flex: 0 0 160px;
+            height: 284px;
+            border: 3px solid #333;
+            background: linear-gradient(145deg, #222 0%, #333 100%);
+        }
+
+        [data-view="compact"] #recentlyViewedContent .item, [data-view="compact"] #moviesContent .item, [data-view="compact"] #musicContent .item {
+            flex: 0 0 180px;
+            height: 135px;
+        }
+
+        [data-view="compact"] #booksContent .item {
+            flex: 0 0 120px;
+            height: 213px;
+        }
+
+        .item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .item p {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+            color: var(--text-color);
+            font-size: 0.9em;
+            padding: 12px;
+            text-align: center;
+            font-weight: 500;
+            z-index: 3;
+        }
+
+        .item .highlight {
+            background: rgba(255, 255, 0, 0.3);
+        }
+
+        .item .favorite {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: #fff;
+            font-size: 1.5em;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        .item .favorite.favorited {
+            color: #e50914;
+        }
+
+        .item .tooltip {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            white-space: nowrap;
+            z-index: 4;
+            display: none;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .item:hover .tooltip {
+            display: block;
+        }
+
+        .item.premium-placeholder {
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: none;
+        }
+
+        .item.premium-placeholder .premium-lock {
+            color: #fff;
+            font-size: 1em;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 18px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            animation: modalFadeIn 0.3s;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            position: relative;
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-content h2 {
+            color: var(--text-color);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .modal-content video,
+        .modal-content audio,
+        .modal-content iframe {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .modal-content audio {
+            height: 50px;
+        }
+
+        .modal-content iframe {
+            height: 450px;
+        }
+
+        #pdfViewer {
+            width: 100%;
+            height: 600px;
+            border: none;
+            background: #fff;
+            border-radius: 8px;
+        }
+
+        .pdf-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pdf-controls button {
+            padding: 10px 20px;
+            background: var(--accent-color);
+            border: none;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .pdf-controls button:hover {
+            background: var(--accent-hover);
+        }
+
+        .pdf-controls button:disabled {
+            background: #b30710;
+            cursor: not-allowed;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--accent-color);
+            border: none;
+            color: #fff;
+            font-size: 1em;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .close-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 5px solid var(--accent-color);
+            border-top: 5px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f40612;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 6px;
+            z-index: 2000;
+            display: none;
+            animation: toastIn 0.3s;
+        }
+
+        .toast.active {
+            display: block;
+        }
+
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        #searchResults {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        .settings-modal .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .settings-modal .theme-preview {
+            width: 100%;
+            height: 100px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .settings-modal .theme-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .settings-modal .theme-preview.selected {
+            border-color: var(--accent-color);
+        }
+
+        .settings-modal .theme-dark {
+            background: #0a0a0a;
+        }
+
+        .settings-modal .theme-light {
+            background: #f5f5f5;
+        }
+
+        .settings-modal .theme-high-contrast {
+            background: #000;
+        }
+
+        .settings-modal .toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .settings-modal .toggle input {
+            width: 40px;
+            height: 20px;
+            appearance: none;
+            background: #333;
+            border-radius: 20px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .settings-modal .toggle input:checked {
+            background: var(--accent-color);
+        }
+
+        .settings-modal .toggle input::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .settings-modal .toggle input:checked::before {
+            transform: translateX(20px);
+        }
+
+        @media (max-width: 768px) {
+            header { padding: 12px 20px; }
+            .logo { font-size: 1.4em; }
+            nav { gap: 15px; }
+            .search-bar input { width: 150px; }
+            .search-bar input:focus { width: 200px; }
+            .avatar { width: 32px; height: 32px; font-size: 1em; }
+            .dropdown { top: 50px; right: 10px; }
+            .content-container { padding: 70px 15px 20px; }
+            .login-box { padding: 30px; max-width: 90%; }
+            .section h2 { font-size: 1.5em; }
+            #recentlyViewedContent .item, #moviesContent .item, #musicContent .item { flex: 0 0 200px; height: 150px; }
+            #booksContent .item { flex: 0 0 140px; height: 248px; }
+            [data-view="compact"] #recentlyViewedContent .item, [data-view="compact"] #moviesContent .item, [data-view="compact"] #musicContent .item { flex: 0 0 150px; height: 112px; }
+            [data-view="compact"] #booksContent .item { flex: 0 0 100px; height: 178px; }
+            .modal-content { padding: 20px; max-width: 90%; }
+            .modal-content iframe { height: 300px; }
+            #pdfViewer { height: 400px; }
+            .settings-modal .theme-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            header { padding: 10px 15px; flex-direction: column; gap: 10px; }
+            nav { gap: 10px; flex-wrap: wrap; }
+            .search-bar input { width: 120px; }
+            .search-bar input:focus { width: 160px; }
+            .login-box { padding: 20px; }
+            #recentlyViewedContent .item, #moviesContent .item, #musicContent .item { flex: 0 0 160px; height: 120px; }
+            #booksContent .item { flex: 0 0 120px; height: 213px; }
+            [data-view="compact"] #recentlyViewedContent .item, [data-view="compact"] #moviesContent .item, [data-view="compact"] #musicContent .item { flex: 0 0 120px; height: 90px; }
+            [data-view="compact"] #booksContent .item { flex: 0 0 90px; height: 160px; }
+            .modal-content iframe { height: 250px; }
+            #pdfViewer { height: 300px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo" role="img" aria-label="Logo Kodeń Media">Kodeń Media</div>
+        <nav role="navigation" aria-label="Główna nawigacja">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Szukaj..." aria-label="Wyszukaj filmy, muzykę lub książki">
+            </div>
+            <div class="avatar" id="avatar" role="button" tabindex="0" aria-label="Menu użytkownika" aria-haspopup="true"></div>
+            <div class="dropdown" id="dropdown" role="menu">
+                <button role="menuitem" aria-label="Ustawienia">Ustawienia</button>
+                <button role="menuitem" aria-label="Ulubione">Ulubione</button>
+                <button role="menuitem" aria-label="Wyloguj się">Wyloguj</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-container" id="loginContainer" role="main" aria-label="Ekran logowania">
+        <div class="login-box">
+            <h1>Kodeń Media</h1>
+            <input type="text" id="username" placeholder="Login" required aria-label="Nazwa użytkownika">
+            <input type="password" id="password" placeholder="Hasło" required aria-label="Hasło">
+            <button id="loginButton" tabindex="0" aria-label="Zaloguj się">
+                <span>Zaloguj</span>
+                <span class="spinner"></span>
+            </button>
+            <p class="error" id="errorMessage" role="alert" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <div class="content-container" id="contentContainer" role="main" aria-label="Treści multimedialne">
+        <div class="content-loading" id="contentLoading">
+            <div class="loading-spinner"></div>
+            <div class="progress-bar"><div id="progressBar"></div></div>
+        </div>
+        <div class="section" id="recentlyViewed" role="region" aria-label="Ostatnio oglądane">
+            <h2>Ostatnio oglądane</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="recentlyViewedContent" tabindex="0" aria-label="Karuzela ostatnio oglądanych"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="movies" role="region" aria-label="Sekcja Filmy">
+            <h2>Filmy</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="moviesContent" tabindex="0" aria-label="Karuzela filmów"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="music" role="region" aria-label="Sekcja Muzyka">
+            <h2>Muzyka</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="musicContent" tabindex="0" aria-label="Karuzela muzyki"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="books" role="region" aria-label="Sekcja Książki">
+            <h2>Książki</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="booksContent" tabindex="0" aria-label="Karuzela książek"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="mediaModal" role="dialog" aria-label="Odtwarzacz multimediów">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <div id="mediaPlayer"></div>
+            <div id="pdfViewerContainer" style="display: none; position: relative;">
+                <div class="loading-overlay" id="pdfLoadingOverlay">
+                    <div class="loading-spinner"></div>
+                </div>
+                <canvas id="pdfViewer"></canvas>
+                <div class="pdf-controls">
+                    <button aria-label="Poprzednia strona">Poprzednia</button>
+                    <span id="pageInfo"></span>
+                    <button aria-label="Następna strona">Następna</button>
+                </div>
+            </div>
+            <button class="close-btn" tabindex="0" aria-label="Zamknij odtwarzacz">Zamknij</button>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal" role="dialog" aria-label="Ustawienia">
+        <div class="modal-content settings-modal">
+            <h2>Ustawienia</h2>
+            <div class="theme-grid">
+                <div class="theme-preview theme-dark" data-theme="dark" role="button" aria-label="Motyw ciemny"></div>
+                <div class="theme-preview theme-light" data-theme="light" role="button" aria-label="Motyw jasny"></div>
+                <div class="theme-preview theme-high-contrast" data-theme="high-contrast" role="button" aria-label="Motyw wysokiego kontrastu"></div>
+            </div>
+            <div class="toggle">
+                <label for="compactView">Kompaktowy widok</label>
+                <input type="checkbox" id="compactView" aria-label="Włącz kompaktowy widok">
+            </div>
+            <div class="toggle">
+                <label for="favoritesOnly">Pokaż tylko ulubione</label>
+                <input type="checkbox" id="favoritesOnly" aria-label="Pokaż tylko ulubione elementy">
+            </div>
+            <button class="close-btn" tabindex="0" aria-label="Zamknij ustawienia">Zamknij</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div id="searchResults" role="status" aria-live="polite"></div>
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVdg1iwAH6fnJnJ8GL5uLoPRtS2Iij-IC-hVI_-Q1tfanlrv6jelBqCCMRHXlwgW27YA/exec';
+            let apiData = { films: [], music: [], books: [] };
+            let userData = { premium: false, access: false, username: '' };
+            let pdfDoc = null;
+            let pageNum = 1;
+            let pageRendering = false;
+            let pageNumPending = null;
+            let canvas = null;
+            let ctx = null;
+            let favorites = JSON.parse(localStorage.getItem('favorites')) || {};
+            let recentlyViewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+                
+            const fallbackData = {
+                films: [
+                    { title: 'Przykładowy Film', imageUrl: 'https://via.placeholder.com/240x180', url: 'https://www.youtube.com/embed/dQw4w9WgXcQ', isPremium: false, description: 'Przykładowy opis filmu' }
+                ],
+                music: [
+                    { title: 'Przykładowa Muzyka', imageUrl: 'https://via.placeholder.com/240x180', url: '', youtubeId: 'dQw4w9WgXcQ', isPremium: false, description: 'Przykładowy opis muzyki' }
+                ],
+                books: [
+                    { title: 'Przykładowa Książka', imageUrl: 'https://via.placeholder.com/160x284', url: 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf', isPremium: false, description: 'Przykładowy opis książki' }
+                ]
+            };
+            
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('active');
+                setTimeout(() => toast.classList.remove('active'), 3000);
+            }
+            
+            function calculateContrastRatio(lum1, lum2) {
+                return (Math.max(lum1, lum2) + 0.05) / (Math.min(lum1, lum2) + 0.05);
+            }
+            
+            function calculateLuminance(hex) {
+                const r = parseInt(hex.slice(1, 3), 16) / 255;
+                const g = parseInt(hex.slice(3, 5), 16) / 255;
+                const b = parseInt(hex.slice(5, 7), 16) / 255;
+                return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            }
+            
+            function generateAvatar(username) {
+                const avatar = document.getElementById('avatar');
+                const firstLetter = username.charAt(0).toUpperCase() || 'U';
+                const secondLetter = username.length >= 2 ? username.charAt(1).toUpperCase() : '+';
+                let bgColor = '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+                let bgLuminance = calculateLuminance(bgColor);
+                let textColor = bgLuminance > 0.5 ? '#222' : '#ccc';
+                let textLuminance = calculateLuminance(textColor);
+                while (calculateContrastRatio(bgLuminance, textLuminance) < 4.5) {
+                    textColor = bgLuminance > 0.5 ? '#111' : '#ddd';
+                    textLuminance = calculateLuminance(textColor);
+                }
+                avatar.textContent = firstLetter + secondLetter;
+                avatar.style.backgroundColor = bgColor;
+                avatar.style.color = textColor;
+            }
+            
+            function toggleDropdown() {
+                const dropdown = document.getElementById('dropdown');
+                dropdown.classList.toggle('active');
+                if (dropdown.classList.contains('active')) {
+                    dropdown.querySelector('button').focus();
+                }
+            }
+            
+            function openSettingsModal() {
+                const modal = document.getElementById('settingsModal');
+                const compactView = document.getElementById('compactView');
+                const favoritesOnly = document.getElementById('favoritesOnly');
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                const currentView = document.documentElement.getAttribute('data-view') || 'full';
+                const isFavoritesOnly = localStorage.getItem('favoritesOnly') === 'true';
+            
+                document.querySelectorAll('.theme-preview').forEach(preview => {
+                    preview.classList.toggle('selected', preview.dataset.theme === currentTheme);
+                });
+            
+                compactView.checked = currentView === 'compact';
+                favoritesOnly.checked = isFavoritesOnly;
+            
+                modal.style.display = 'flex';
+                modal.focus();
+                toggleDropdown();
+            }
+            
+            function showFavorites() {
+                const modal = document.getElementById('mediaModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const mediaPlayer = document.getElementById('mediaPlayer');
+                const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+            
+                modalTitle.textContent = 'Ulubione';
+                mediaPlayer.style.display = 'block';
+                pdfViewerContainer.style.display = 'none';
+                mediaPlayer.innerHTML = '';
+            
+                const favoriteItems = Object.keys(favorites).map(title => {
+                    for (let section of Object.values(apiData)) {
+                        const item = section.find(i => i.title === title);
+                        if (item) return { ...item, section: Object.keys(apiData).find(key => apiData[key] === section) };
+                    }
+                    return null;
+                }).filter(item => item);
+            
+                mediaPlayer.innerHTML = favoriteItems.length
+                    ? favoriteItems.map(item => `
+                        <div class="item" role="button" tabindex="0" aria-label="Otwórz ${sanitizeInput(item.title)}"
+                             data-category="${item.section.slice(0, -1)}" data-item='${JSON.stringify(item)}'>
+                            <img src="${sanitizeInput(item.imageUrl)}" alt="${sanitizeInput(item.title)}" loading="lazy">
+                            <button class="favorite favorited" onclick="toggleFavorite('${sanitizeInput(item.title)}')"
+                                    aria-label="Usuń z ulubionych">♥</button>
+                            <p>${sanitizeInput(item.title)}</p>
+                        </div>
+                    `).join('')
+                    : '<p style="color: var(--text-color); text-align: center;">Brak ulubionych</p>';
+                    
+                modal.style.display = 'flex';
+                modal.focus();
+                toggleDropdown();
+            }
+            
+            function createJSONPScript(url, callbackName) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + callbackName;
+                    script.onerror = () => reject(new Error('Nie udało się połączyć z API'));
+                    script.onload = () => resolve();
+                    document.head.appendChild(script);
+                    setTimeout(() => {
+                        document.head.removeChild(script);
+                        reject(new Error('Timeout JSONP'));
+                    }, 10000);
+                });
+            }
+            
+            async function retryOperation(operation, maxRetries = 3, delay = 1000) {
+                for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                    try {
+                        return await operation();
+                    } catch (error) {
+                        if (attempt === maxRetries) throw error;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                }
+            }
+            
+            function sanitizeInput(input) {
+                const div = document.createElement('div');
+                div.textContent = input;
+                return div.innerHTML;
+            }
+            
+            async function login() {
+                const username = sanitizeInput(document.getElementById('username').value.trim());
+                const password = document.getElementById('password').value;
+                const errorMessage = document.getElementById('errorMessage');
+                const loginButton = document.getElementById('loginButton');
+            
+                if (!username || !password) {
+                    errorMessage.textContent = 'Wypełnij wszystkie pola';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+            
+                loginButton.disabled = true;
+                loginButton.classList.add('loading');
+            
+                try {
+                    const callbackName = 'loginCallback_' + Date.now();
+                    window[callbackName] = (result) => {
+                        loginButton.disabled = false;
+                        loginButton.classList.remove('loading');
+                        if (result.success && result.access) {
+                            userData = { premium: result.premium, access: result.access, username };
+                            generateAvatar(username);
+                            document.getElementById('loginContainer').style.display = 'none';
+                            document.getElementById('contentContainer').style.display = 'block';
+                            document.getElementById('avatar').style.display = 'flex';
+                            errorMessage.style.display = 'none';
+                            loadContent();
+                        } else {
+                            errorMessage.textContent = result.access === false ? 'Konto zablokowane' : result.message || 'Nieprawidłowy login lub hasło';
+                            errorMessage.style.display = 'block';
+                        }
+                        delete window[callbackName];
+                    };
+                
+                    const loginData = encodeURIComponent(JSON.stringify({ endpoint: 'login', username, password }));
+                    await retryOperation(() => createJSONPScript(`${SCRIPT_URL}?data=${loginData}`, callbackName));
+                } catch (error) {
+                    loginButton.disabled = false;
+                    loginButton.classList.remove('loading');
+                    errorMessage.textContent = 'Błąd połączenia';
+                    errorMessage.style.display = 'block';
+                    showToast('Nie można zalogować. Spróbuj ponownie.');
+                    console.log('Błąd logowania:', error);
+                }
+            }
+            
+            function logout() {
+                userData = { premium: false, access: false, username: '' };
+                document.getElementById('contentContainer').style.display = 'none';
+                document.getElementById('loginContainer').style.display = 'flex';
+                document.getElementById('avatar').style.display = 'none';
+                document.getElementById('dropdown').classList.remove('active');
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('errorMessage').style.display = 'none';
+                apiData = { films: [], music: [], books: [] };
+                document.querySelectorAll('.carousel').forEach(carousel => carousel.innerHTML = '');
+                localStorage.removeItem('favorites');
+                localStorage.removeItem('recentlyViewed');
+                localStorage.removeItem('contentCache');
+                favorites = {};
+                recentlyViewed = [];
+            }
+            
+            async function loadContent() {
+                const contentLoading = document.getElementById('contentLoading');
+                const progressBar = document.getElementById('progressBar');
+                contentLoading.classList.add('active');
+            
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${Math.min(progress, 90)}%`;
+                }, 500);
+            
+                const cachedData = localStorage.getItem('contentCache');
+                const cacheTimestamp = localStorage.getItem('contentCacheTimestamp');
+                const cacheAge = cacheTimestamp ? (Date.now() - parseInt(cacheTimestamp)) / 1000 / 60 / 60 : Infinity;
+            
+                if (cachedData && cacheAge < 1) {
+                    apiData = JSON.parse(cachedData);
+                    renderContent();
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    setTimeout(() => contentLoading.classList.remove('active'), 300);
+                    return;
+                }
+            
+                try {
+                    const callbackName = 'contentCallback_' + Date.now();
+                    window[callbackName] = (result) => {
+                        console.log('API response:', result);
+                        if (result.success && result.data) {
+                            apiData = {
+                                films: Array.isArray(result.data.films) ? result.data.films : result.data.movies || [],
+                                music: Array.isArray(result.data.music) ? result.data.music : [],
+                                books: Array.isArray(result.data.books) ? result.data.books : []
+                            };
+                            if (!userData.premium) {
+                                Object.keys(apiData).forEach(section => {
+                                    apiData[section] = apiData[section].map(item => 
+                                        item.isPremium ? { isPremium: true, placeholder: true, title: '', imageUrl: '' } : item
+                                    );
+                                });
+                            }
+                            localStorage.setItem('contentCache', JSON.stringify(apiData));
+                            localStorage.setItem('contentCacheTimestamp', Date.now().toString());
+                        } else {
+                            apiData = fallbackData;
+                            showToast('Nie udało się pobrać zawartości. Użyto danych przykładowych.');
+                        }
+                        console.log('Normalized API data:', apiData);
+                        renderContent();
+                        clearInterval(progressInterval);
+                        progressBar.style.width = '100%';
+                        setTimeout(() => contentLoading.classList.remove('active'), 300);
+                        delete window[callbackName];
+                    };
+                
+                    const contentData = encodeURIComponent(JSON.stringify({ endpoint: 'content', premium: userData.premium }));
+                    await retryOperation(() => createJSONPScript(`${SCRIPT_URL}?data=${contentData}`, callbackName));
+                } catch (error) {
+                    if (cachedData) {
+                        apiData = JSON.parse(cachedData);
+                        showToast('Brak połączenia. Użyto zbuforowanych danych.');
+                    } else {
+                        apiData = fallbackData;
+                        showToast('Brak połączenia. Użyto danych przykładowych.');
+                    }
+                    renderContent();
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    setTimeout(() => contentLoading.classList.remove('active'), 300);
+                    console.log('Błąd ładowania treści:', error);
+                }
+            }
+            
+            function renderContent(filter = '') {
+                const carousels = {
+                    films: document.getElementById('moviesContent'),
+                    music: document.getElementById('musicContent'),
+                    books: document.getElementById('booksContent'),
+                    recentlyViewed: document.getElementById('recentlyViewedContent')
+                };
+            
+                let totalResults = 0;
+                const searchResults = document.getElementById('searchResults');
+                const isFavoritesOnly = localStorage.getItem('favoritesOnly') === 'true';
+            
+                // Render Recently Viewed
+                const filteredRecent = filter
+                    ? recentlyViewed.filter(item => item.title.toLowerCase().includes(filter.toLowerCase()))
+                    : recentlyViewed;
+                const visibleRecent = filteredRecent.slice(0, 15);
+                carousels.recentlyViewed.innerHTML = visibleRecent.length
+                    ? visibleRecent.map((item, idx) => {
+                        if (isFavoritesOnly && !favorites[item.title]) return '';
+                        const highlightedTitle = filter
+                            ? item.title.replace(new RegExp(`(${filter})`, 'gi'), '<span class="highlight">$1</span>')
+                            : item.title;
+                        return `
+                            <div class="item" role="button" tabindex="0" aria-label="Otwórz ${sanitizeInput(item.title)} (element ${idx + 1} z ${visibleRecent.length})"
+                                 data-category="${item.section.slice(0, -1)}" data-item='${JSON.stringify(item)}'>
+                                <img src="${sanitizeInput(item.imageUrl)}?w=240" alt="${sanitizeInput(item.title)}" loading="lazy">
+                                <button class="favorite ${favorites[item.title] ? 'favorited' : ''}" 
+                                        onclick="toggleFavorite('${sanitizeInput(item.title)}')" 
+                                        aria-label="${favorites[item.title] ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}">♥</button>
+                                <p>${highlightedTitle}</p>
+                                <span class="tooltip">${sanitizeInput(item.description || 'Brak opisu')}</span>
+                            </div>
+                        `;
+                    }).join('')
+                    : '<p style="color: var(--text-color); text-align: center;">Brak ostatnio oglądanych</p>';
+                totalResults += visibleRecent.length;
+                updateCarouselNav('recentlyViewedContent');
+                
+                // Render Main Sections
+                Object.entries(apiData).forEach(([section, items]) => {
+                    if (!carousels[section]) return;
+                
+                    let filteredItems = filter
+                        ? items.filter(item => item.title.toLowerCase().includes(filter.toLowerCase()))
+                        : items;
+                    if (isFavoritesOnly) {
+                        filteredItems = filteredItems.filter(item => favorites[item.title]);
+                    }
+                
+                    totalResults += filteredItems.length;
+                    const visibleItems = filteredItems.slice(0, 10);
+                    carousels[section].innerHTML = visibleItems.length
+                        ? visibleItems.map((item, idx) => {
+                            if (item.placeholder) {
+                                return `
+                                    <div class="item premium-placeholder" role="button" tabindex="0" aria-label="Treść premium (element ${idx + 1} z ${visibleItems.length})">
+                                        <div class="premium-lock">🔒 Premium wymagane</div>
+                                    </div>
+                                `;
+                            }
+                            const highlightedTitle = filter
+                                ? item.title.replace(new RegExp(`(${filter})`, 'gi'), '<span class="highlight">$1</span>')
+                                : item.title;
+                            return `
+                                <div class="item" role="button" tabindex="0" aria-label="Otwórz ${sanitizeInput(item.title)} (element ${idx + 1} z ${visibleItems.length})"
+                                     data-category="${section.slice(0, -1)}" data-item='${JSON.stringify(item)}'>
+                                    <img src="${sanitizeInput(item.imageUrl)}?w=${section === 'books' ? 160 : 240}" alt="${sanitizeInput(item.title)}" loading="lazy">
+                                    <button class="favorite ${favorites[item.title] ? 'favorited' : ''}" 
+                                            onclick="toggleFavorite('${sanitizeInput(item.title)}')" 
+                                            aria-label="${favorites[item.title] ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}">♥</button>
+                                    <p>${highlightedTitle}</p>
+                                    <span class="tooltip">${sanitizeInput(item.description || 'Brak opisu')}</span>
+                                </div>
+                            `;
+                        }).join('')
+                        : '<p style="color: var(--text-color); text-align: center;">Brak wyników</p>';
+                    
+                    updateCarouselNav(carousels[section].id);
+                });
+            
+                searchResults.textContent = filter ? `Znaleziono ${totalResults} wyników` : '';
+            }
+            
+            function toggleFavorite(title) {
+                if (favorites[title]) {
+                    delete favorites[title];
+                } else {
+                    favorites[title] = true;
+                }
+                localStorage.setItem('favorites', JSON.stringify(favorites));
+                renderContent(document.getElementById('searchInput').value);
+            }
+            
+            function scrollCarousel(carouselId, amount) {
+                const carousel = document.getElementById(carouselId);
+                requestAnimationFrame(() => {
+                    carousel.scrollLeft += amount;
+                    updateCarouselNav(carouselId);
+                });
+            }
+            
+            function updateCarouselNav(carouselId) {
+                const carousel = document.getElementById(carouselId);
+                const prevBtn = carousel.parentElement.querySelector('.carousel-prev');
+                const nextBtn = carousel.parentElement.querySelector('.carousel-next');
+                prevBtn.disabled = carousel.scrollLeft <= 0;
+                nextBtn.disabled = carousel.scrollLeft + carousel.clientWidth >= carousel.scrollWidth;
+            }
+            
+            async function fetchPDFAsBlob(url) {
+                try {
+                    const response = await fetch(url, { mode: 'no-cors' });
+                    if (!response.ok && response.type !== 'opaque') throw new Error('Błąd pobierania PDF');
+                    const blob = await response.blob();
+                    return URL.createObjectURL(blob);
+                } catch (error) {
+                    console.log('Błąd pobierania PDF:', error);
+                    return 'https://mozilla.github.io/pdf.js/web/compressed.tracemonkey-pldi-09.pdf';
+                }
+            }
+            
+            async function openMediaModal(category, item) {
+                if (item.placeholder) {
+                    showToast('Wymagany dostęp premium!');
+                    return;
+                }
+            
+                const modal = document.getElementById('mediaModal');
+                const modalTitle = document.getElementById('modalTitle');
+                const mediaPlayer = document.getElementById('mediaPlayer');
+                const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+            
+                // Add to recently viewed
+                recentlyViewed = recentlyViewed.filter(i => i.title !== item.title);
+                recentlyViewed.unshift({ ...item, section: category.toLowerCase() + 's' });
+                if (recentlyViewed.length > 5) recentlyViewed.pop();
+                localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
+            
+                modalTitle.textContent = sanitizeInput(item.title);
+                mediaPlayer.innerHTML = '';
+                mediaPlayer.style.display = 'block';
+                pdfViewerContainer.style.display = 'none';
+            
+                try {
+                    if (category === 'Film') {
+                        mediaPlayer.innerHTML = `<iframe src="${sanitizeInput(item.url)}" allowfullscreen></iframe>`;
+                    } else if (category === 'Muzyka') {
+                        mediaPlayer.innerHTML = `
+                            <div id="youtubePlayer"></div>
+                            <audio controls id="audioPlayer" style="display: none;">
+                                <source src="${sanitizeInput(item.url)}" type="audio/mpeg">
+                                Brak obsługi audio.
+                            </audio>
+                        `;
+                        if (item.youtubeId) {
+                            new YT.Player('youtubePlayer', {
+                                height: '200',
+                                width: '100%',
+                                videoId: item.youtubeId,
+                                playerVars: { 'playsinline': 1, 'controls': 1 }
+                            });
+                        } else {
+                            document.getElementById('audioPlayer').style.display = 'block';
+                        }
+                    } else if (category === 'Książka') {
+                        mediaPlayer.style.display = 'none';
+                        pdfViewerContainer.style.display = 'block';
+                        document.getElementById('pdfLoadingOverlay').classList.add('active');
+                        const pdfUrl = await fetchPDFAsBlob(item.url);
+                        loadPDF(pdfUrl);
+                    }
+                } catch (error) {
+                    showToast('Nie udało się załadować treści.');
+                    console.log('Błąd otwierania multimediów:', error);
+                }
+            
+                modal.style.display = 'flex';
+                modal.focus();
+                renderContent(document.getElementById('searchInput').value);
+            }
+            
+            async function loadPDF(url) {
+                canvas = document.getElementById('pdfViewer');
+                ctx = canvas.getContext('2d');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+            
+                try {
+                    pdfDoc = await pdfjsLib.getDocument(url).promise;
+                    pageNum = 1;
+                    renderPage(pageNum);
+                } catch (error) {
+                    document.getElementById('pdfViewerContainer').innerHTML = '<p style="color: #f40612; text-align: center;">Nie udało się załadować PDF. Spróbuj ponownie później.</p>';
+                    console.log('Błąd ładowania PDF:', error);
+                } finally {
+                    document.getElementById('pdfLoadingOverlay').classList.remove('active');
+                }
+            }
+            
+            function renderPage(num) {
+                if (!pdfDoc) return;
+                pageRendering = true;
+                pdfDoc.getPage(num).then(page => {
+                    const viewport = page.getViewport({ scale: 1.5 });
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                
+                    const renderContext = { canvasContext: ctx, viewport };
+                    const renderTask = page.render(renderContext);
+                
+                    renderTask.promise.then(() => {
+                        pageRendering = false;
+                        document.getElementById('pageInfo').textContent = `Strona ${num} z ${pdfDoc.numPages}`;
+                        document.querySelectorAll('.pdf-controls button').forEach(btn => btn.disabled = false);
+                        if (pageNumPending !== null) {
+                            renderPage(pageNumPending);
+                            pageNumPending = null;
+                        }
+                    });
+                }).catch(error => {
+                    document.getElementById('pdfViewerContainer').innerHTML = '<p style="color: #f40612; text-align: center;">Błąd renderowania PDF.</p>';
+                    document.getElementById('pdfLoadingOverlay').classList.remove('active');
+                    console.log('Błąd renderowania strony:', error);
+                });
+            }
+            
+            function previousPage() {
+                if (pageNum <= 1 || !pdfDoc) return;
+                pageNum--;
+                queueRenderPage(pageNum);
+            }
+            
+            function nextPage() {
+                if (pageNum >= pdfDoc.numPages || !pdfDoc) return;
+                pageNum++;
+                queueRenderPage(pageNum);
+            }
+            
+            function queueRenderPage(num) {
+                if (pageRendering) {
+                    pageNumPending = num;
+                } else {
+                    renderPage(num);
+                }
+            }
+            
+            function closeModal() {
+                const modal = document.getElementById('mediaModal');
+                const mediaPlayer = document.getElementById('mediaPlayer');
+                const pdfViewerContainer = document.getElementById('pdfViewerContainer');
+                modal.style.display = 'none';
+                mediaPlayer.innerHTML = '';
+                pdfViewerContainer.style.display = 'none';
+                pdfViewerContainer.innerHTML = `
+                    <div class="loading-overlay" id="pdfLoadingOverlay">
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <canvas id="pdfViewer"></canvas>
+                    <div class="pdf-controls">
+                        <button onclick="previousPage()" aria-label="Poprzednia strona">Poprzednia</button>
+                        <span id="pageInfo"></span>
+                        <button onclick="nextPage()" aria-label="Następna strona">Następna</button>
+                    </div>
+                `;
+                pdfDoc = null;
+                pageNum = 1;
+            }
+            
+            function closeSettingsModal() {
+                document.getElementById('settingsModal').style.display = 'none';
+            }
+            
+            function debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+            
+            function initEventListeners() {
+                document.getElementById('avatar').style.display = 'none';
+            
+                document.addEventListener('click', (e) => {
+                    const target = e.target;
+                    if (target.closest('.item') && !target.closest('.favorite') && !target.closest('.premium-placeholder')) {
+                        const item = JSON.parse(target.closest('.item').dataset.item);
+                        const category = target.closest('.item').dataset.category;
+                        openMediaModal(category, item);
+                    } else if (target.closest('.premium-placeholder')) {
+                        showToast('Wymagany dostęp premium!');
+                    } else if (target.closest('.theme-preview')) {
+                        const theme = target.dataset.theme;
+                        document.documentElement.setAttribute('data-theme', theme);
+                        localStorage.setItem('theme', theme);
+                        document.querySelectorAll('.theme-preview').forEach(preview => {
+                            preview.classList.toggle('selected', preview.dataset.theme === theme);
+                        });
+                    } else if (!target.closest('.avatar') && !target.closest('.dropdown')) {
+                        document.getElementById('dropdown').classList.remove('active');
+                    } else if (!target.closest('.modal-content') && target.closest('#mediaModal')) {
+                        closeModal();
+                    } else if (!target.closest('.modal-content') && target.closest('#settingsModal')) {
+                        closeSettingsModal();
+                    }
+                });
+            
+                document.addEventListener('keydown', (e) => {
+                    if (e.target.closest('.item') && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        if (e.target.closest('.premium-placeholder')) {
+                            showToast('Wymagany dostęp premium!');
+                            return;
+                        }
+                        const item = JSON.parse(e.target.closest('.item').dataset.item);
+                        const category = e.target.closest('.item').dataset.category;
+                        openMediaModal(category, item);
+                    } else if (e.key === 'Escape' && document.getElementById('mediaModal').style.display === 'flex') {
+                        closeModal();
+                    } else if (e.key === 'Escape' && document.getElementById('settingsModal').style.display === 'flex') {
+                        closeSettingsModal();
+                    } else if (e.key === 'Escape' && document.getElementById('dropdown').classList.contains('active')) {
+                        toggleDropdown();
+                    } else if (e.target.closest('.carousel') && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+                        const carousel = e.target.closest('.carousel');
+                        const items = carousel.querySelectorAll('.item, .premium-placeholder');
+                        const focusedIndex = Array.from(items).findIndex(item => item === document.activeElement);
+                        const nextIndex = e.key === 'ArrowRight' ? focusedIndex + 1 : focusedIndex - 1;
+                        if (nextIndex >= 0 && nextIndex < items.length) {
+                            items[nextIndex].focus();
+                            const itemWidth = carousel.id === 'booksContent' ? 160 : 240;
+                            carousel.scrollLeft = nextIndex * (itemWidth + 20) - carousel.clientWidth / 2 + itemWidth / 2;
+                        }
+                    }
+                });
+            
+                document.getElementById('avatar').addEventListener('click', toggleDropdown);
+                document.getElementById('avatar').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        toggleDropdown();
+                    }
+                });
+            
+                document.getElementById('username').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') document.getElementById('password').focus();
+                });
+            
+                document.getElementById('password').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') login();
+                });
+            
+                document.getElementById('loginButton').addEventListener('click', login);
+            
+                const renderSearch = debounce(() => {
+                    renderContent(document.getElementById('searchInput').value);
+                }, 300);
+                document.getElementById('searchInput').addEventListener('input', renderSearch);
+            
+                document.querySelectorAll('.carousel').forEach(carousel => {
+                    let isScrolling = false;
+                    carousel.addEventListener('keydown', (e) => {
+                        if (e.key === 'ArrowRight') {
+                            scrollCarousel(carousel.id, carousel.id === 'booksContent' ? 160 : 240);
+                        } else if (e.key === 'ArrowLeft') {
+                            scrollCarousel(carousel.id, carousel.id === 'booksContent' ? -160 : -240);
+                        }
+                    });
+                
+                    let startX, scrollLeft;
+                    carousel.addEventListener('touchstart', (e) => {
+                        startX = e.touches[0].pageX;
+                        scrollLeft = carousel.scrollLeft;
+                    });
+                
+                    carousel.addEventListener('touchmove', (e) => {
+                        if (isScrolling) return;
+                        const x = e.touches[0].pageX;
+                        const walk = (startX - x) * 2;
+                        carousel.scrollLeft = scrollLeft + walk;
+                    });
+                
+                    carousel.addEventListener('scroll', () => {
+                        isScrolling = true;
+                        updateCarouselNav(carousel.id);
+                        clearTimeout(carousel.scrollTimeout);
+                        carousel.scrollTimeout = setTimeout(() => {
+                            isScrolling = false;
+                        }, 150);
+                    });
+                
+                    carousel.querySelector('.carousel-prev').addEventListener('click', () => {
+                        scrollCarousel(carousel.id, carousel.id === 'booksContent' ? -160 : -240);
+                    });
+                
+                    carousel.querySelector('.carousel-next').addEventListener('click', () => {
+                        scrollCarousel(carousel.id, carousel.id === 'booksContent' ? 160 : 240);
+                    });
+                });
+            
+                document.getElementById('dropdown').addEventListener('click', (e) => {
+                    if (e.target.textContent === 'Ustawienia') {
+                        openSettingsModal();
+                    } else if (e.target.textContent === 'Ulubione') {
+                        showFavorites();
+                    } else if (e.target.textContent === 'Wyloguj') {
+                        logout();
+                    }
+                });
+            
+                document.getElementById('settingsModal').querySelector('.close-btn').addEventListener('click', closeSettingsModal);
+                document.getElementById('mediaModal').querySelector('.close-btn').addEventListener('click', closeModal);
+            
+                document.getElementById('compactView').addEventListener('change', (e) => {
+                    const view = e.target.checked ? 'compact' : 'full';
+                    document.documentElement.setAttribute('data-view', view);
+                    localStorage.setItem('view', view);
+                    renderContent(document.getElementById('searchInput').value);
+                });
+            
+                document.getElementById('favoritesOnly').addEventListener('change', (e) => {
+                    localStorage.setItem('favoritesOnly', e.target.checked);
+                    renderContent(document.getElementById('searchInput').value);
+                });
+            
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+            
+                const savedView = localStorage.getItem('view') || 'full';
+                document.documentElement.setAttribute('data-view', savedView);
+            }
+            
+            initEventListeners();
+    </script>
+</body>
+</html>
