@@ -1,5 +1,5 @@
 // Configuration
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwxz8a3e-uHYRnllNJ3ztprRZN4DouQVnowdEo76Bs22Qc6LZ88mzs4pL4v-qEATCuc5g/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby4rveXek9uGiosaCqqDi2DkuyvnmlM_OFiQ-JpHHqwTR3zw38xjBpIoTDFT5eqrEE_qQ/exec';
 let userData = null;
 let apiData = null;
 let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
