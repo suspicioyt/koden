@@ -66,11 +66,12 @@ function toggleDropdown() {
 
 // Close modal
 function closeModal(modalId) {
-    const modal = document.getElementById('modalId');
+    const modal = document.getElementById(modalId);
     if (modal) modal.style.display = 'none';
     const mediaPlayer = document.getElementById('mediaPlayer');
     if (mediaPlayer) mediaPlayer.innerHTML = '';
 }
+
 
 // Render carousel item
 function renderCarouselItem(item, section) {
@@ -81,8 +82,9 @@ function renderCarouselItem(item, section) {
         div.innerHTML = `<div class="premium-lock">Treść Premium</div>`;
     } else {
         const isFavorite = favorites.some(fav => fav.id === item.id && fav.category === section);
+        const proxyImageUrl = `${SCRIPT_URL}?endpoint=proxyImage&url=${encodeURIComponent(item.imageUrl)}`;
         div.innerHTML = `
-            <img src="${item.imageUrl}" alt="${item.title}">
+            <img src="${item.imageUrl}" alt="${item.title}" onload="this.style.opacity=1" style="opacity:0; transition:opacity 0.3s;">
             <p>${item.title}</p>
             <div class="tooltip">${item.description}</div>
             <button class="favorite ${isFavorite ? 'favorited' : ''}" aria-label="${isFavorite ? 'Usuń z ulubionych' : 'Dodaj do ulubionych'}">
@@ -90,9 +92,10 @@ function renderCarouselItem(item, section) {
             </button>
             ${section === 'live' && item.liveStatus ? `<span class="live-badge">${item.liveStatus}</span>` : ''}
         `;
+        const img = div.querySelector('img');
         div.querySelector('.favorite').addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleFavorite(item, section);
+            toggleFavorite(item, section, div.querySelector('.favorite'));
         });
         div.addEventListener('click', () => playMedia(item, section));
     }
@@ -130,9 +133,12 @@ function renderCarousel(section, items, containerId) {
     updateButtons();
 }
 
-// Render content
+// Render content (called once after login)
 function renderContent() {
-    const favoritesOnly = document.getElementById('favoritesOnly')?.checked;
+    if (!apiData) {
+        showToast('Brak danych do wyświetlenia');
+        return;
+    }
     const sections = {
         live: 'liveContent',
         films: 'moviesContent',
@@ -141,33 +147,48 @@ function renderContent() {
     };
 
     Object.keys(sections).forEach(section => {
-        let items = apiData[section] || [];
-        if (favoritesOnly) {
-            items = items.filter(item => favorites.some(fav => fav.id === item.id && fav.category === section));
-        }
-        renderCarousel(section, items, sections[section]);
+        renderCarousel(section, apiData[section] || [], sections[section]);
     });
 
-    // Recently viewed
-    const recentItems = recentlyViewed.map(view => ({
-        ...view,
-        isPremium: view.isPremium && !userData.premium
-    }));
-    renderCarousel('recentlyViewed', recentItems, 'recentlyViewedContent');
+    renderCarousel('recentlyViewed', recentlyViewed, 'recentlyViewedContent');
 }
 
-// Toggle favorite
-function toggleFavorite(item, section) {
+// Toggle favorite (update button state)
+function toggleFavorite(item, section, button) {
     const index = favorites.findIndex(fav => fav.id === item.id && fav.category === section);
     if (index === -1) {
         favorites.push({ ...item, category: section });
+        button.classList.add('favorited');
+        button.setAttribute('aria-label', 'Usuń z ulubionych');
         showToast('Dodano do ulubionych', false);
     } else {
         favorites.splice(index, 1);
+        button.classList.remove('favorited');
+        button.setAttribute('aria-label', 'Dodaj do ulubionych');
         showToast('Usunięto z ulubionych', false);
     }
     localStorage.setItem('favorites', JSON.stringify(favorites));
-    renderContent();
+    
+    if (document.getElementById('favoritesOnly').checked) {
+        updateFavoritesCarousel();
+    }
+}
+
+// Update favorites carousel
+function updateFavoritesCarousel() {
+    const sections = {
+        live: 'liveContent',
+        films: 'moviesContent',
+        music: 'musicContent',
+        books: 'booksContent'
+    };
+
+    Object.keys(sections).forEach(section => {
+        const items = apiData[section].filter(item => 
+            favorites.some(fav => fav.id === item.id && fav.category === section)
+        );
+        renderCarousel(section, items, sections[section]);
+    });
 }
 
 // Play media
@@ -177,19 +198,22 @@ function playMedia(item, section) {
         return;
     }
 
-    // Add to recently viewed
     recentlyViewed = recentlyViewed.filter(view => view.id !== item.id || view.category !== section);
     recentlyViewed.unshift({ ...item, category: section });
     if (recentlyViewed.length > 5) recentlyViewed.pop();
     localStorage.setItem('recentlyViewed', JSON.stringify(recentlyViewed));
 
-    // Handle books: redirect to URL
+    renderCarousel('recentlyViewed', recentlyViewed, 'recentlyViewedContent');
+
     if (section === 'books') {
-        window.location.href = item.url;
+        if (!item.url) {
+            showToast('Brak linku do książki');
+            return;
+        }
+        window.open(item.url, '_blank')
         return;
     }
 
-    // Handle other categories: show modal with embedded video
     const modal = document.getElementById('mediaModal');
     const title = document.getElementById('modalTitle');
     const mediaPlayer = document.getElementById('mediaPlayer');
@@ -203,7 +227,6 @@ function playMedia(item, section) {
         if (item.url.match(/\.(mp4|webm)$/)) {
             mediaPlayer.innerHTML = `<video controls><source src="${item.url}" type="video/${item.url.split('.').pop()}"></video>`;
         } else {
-            // Assume URL is a YouTube embed or similar iframe-compatible URL
             mediaPlayer.innerHTML = `<iframe src="${item.url}" frameborder="0" allowfullscreen></iframe>`;
         }
     } else {
@@ -212,14 +235,13 @@ function playMedia(item, section) {
     }
 
     modal.style.display = 'flex';
-    renderContent();
 }
 
 // Search content
 function searchContent(query) {
     const searchResults = document.getElementById('searchResults');
     searchResults.innerHTML = '';
-    if (!query) return;
+    if (!query || !apiData) return;
 
     const results = [];
     Object.keys(apiData).forEach(section => {
@@ -244,6 +266,52 @@ function searchContent(query) {
     });
 }
 
+// Load content (called once after login)
+async function loadContent() {
+    const contentLoading = document.getElementById('contentLoading');
+    const progressBar = document.getElementById('progressBar');
+    contentLoading.classList.add('active');
+
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress += 10;
+        progressBar.style.width = `${Math.min(progress, 90)}%`;
+    }, 500);
+
+    try {
+        const result = await jsonpRequest({ endpoint: 'content', premium: userData.premium });
+        console.log('Content fetch result:', result);
+
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        setTimeout(() => contentLoading.classList.remove('active'), 300);
+
+        if (result.success && result.data) {
+            apiData = result.data;
+            if (!userData.premium) {
+                Object.keys(apiData).forEach(section => {
+                    apiData[section] = apiData[section].map(item =>
+                        item.isPremium ? { isPremium: true, title: '', imageUrl: 'https://via.placeholder.com/220x160?text=Premium', url: '', description: '', id: item.id, category: item.category } : item
+                    );
+                });
+            }
+            renderContent();
+        } else {
+            showToast('Nie udało się pobrać zawartości: ' + (result.message || 'Błąd serwera'));
+            apiData = { films: [], music: [], books: [], live: [] };
+            renderContent();
+        }
+    } catch (error) {
+        clearInterval(progressInterval);
+        progressBar.style.width = '100%';
+        setTimeout(() => contentLoading.classList.remove('active'), 300);
+        console.error('Błąd ładowania treści:', error);
+        showToast('Brak połączenia. Wyświetlono pustą zawartość.');
+        apiData = { films: [], music: [], books: [], live: [] };
+        renderContent();
+    }
+}
+
 // Login
 async function login(e) {
     e.preventDefault();
@@ -264,6 +332,7 @@ async function login(e) {
     const params = { endpoint: 'login', username, password };
     try {
         const result = await jsonpRequest(params);
+        console.log('Login result:', result);
 
         loginButton.disabled = false;
         loginButton.classList.remove('loading');
@@ -276,7 +345,13 @@ async function login(e) {
             document.getElementById('contentContainer').classList.add('active');
             document.getElementById('avatar').style.display = 'flex';
             errorMessage.style.display = 'none';
-            loadContent();
+            
+            // Enable search input after login
+            const searchInput = document.getElementById('searchInput');
+            searchInput.disabled = false;
+            searchInput.addEventListener('input', (e) => searchContent(e.target.value));
+            
+            await loadContent();
         } else {
             errorMessage.textContent = result.access === false ? 'Konto zablokowane' : result.message || 'Nieprawidłowy login lub hasło';
             errorMessage.style.display = 'block';
@@ -289,79 +364,6 @@ async function login(e) {
         errorMessage.style.display = 'block';
         showToast('Nie można zalogować. Spróbuj ponownie.');
         console.error('Login error:', error.message);
-    }
-}
-
-// Load content
-async function loadContent() {
-    const contentLoading = document.getElementById('contentLoading');
-    const progressBar = document.getElementById('progressBar');
-    contentLoading.classList.add('active');
-
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-        progress += 10;
-        progressBar.style.width = `${Math.min(progress, 90)}%`;
-    }, 500);
-
-    const cachedData = localStorage.getItem('contentCache');
-    const cacheTimestamp = localStorage.getItem('contentCacheTimestamp');
-    const cacheAge = cacheTimestamp ? (Date.now() - parseInt(cacheTimestamp)) / 1000 / 60 / 60 : Infinity;
-
-    if (cachedData && cacheAge < 1) {
-        apiData = JSON.parse(cachedData);
-        renderContent();
-        clearInterval(progressInterval);
-        progressBar.style.width = '100%';
-        setTimeout(() => contentLoading.classList.remove('active'), 300);
-        return;
-    }
-
-    try {
-        const result = await jsonpRequest({ endpoint: 'content', premium: userData.premium });
-
-        clearInterval(progressInterval);
-        progressBar.style.width = '100%';
-        setTimeout(() => contentLoading.classList.remove('active'), 300);
-
-        if (result.success && result.data) {
-            apiData = result.data;
-            if (!userData.premium) {
-                Object.keys(apiData).forEach(section => {
-                    apiData[section] = apiData[section].map(item =>
-                        item.isPremium ? { isPremium: true, title: '', imageUrl: '', url: '', description: '', id: item.id, category: item.category } : item
-                    );
-                });
-            }
-            localStorage.setItem('contentCache', JSON.stringify(apiData));
-            localStorage.setItem('contentCacheTimestamp', Date.now().toString());
-            renderContent();
-        } else {
-            showToast('Nie udało się pobrać zawartości: ' + (result.message || 'Błąd serwera'));
-            if (cachedData) {
-                apiData = JSON.parse(cachedData);
-                renderContent();
-                showToast('Użyto zbuforowanych danych.', false);
-            } else {
-                apiData = { films: [], music: [], books: [], live: [] };
-                renderContent();
-                showToast('Brak danych. Wyświetlono pustą zawartość.');
-            }
-        }
-    } catch (error) {
-        clearInterval(progressInterval);
-        progressBar.style.width = '100%';
-        setTimeout(() => contentLoading.classList.remove('active'), 300);
-        console.error('Błąd ładowania treści:', error);
-        if (cachedData) {
-            apiData = JSON.parse(cachedData);
-            renderContent();
-            showToast('Brak połączenia. Użyto zbuforowanych danych.', false);
-        } else {
-            apiData = { films: [], music: [], books: [], live: [] };
-            renderContent();
-            showToast('Brak połączenia. Wyświetlono pustą zawartość.');
-        }
     }
 }
 
@@ -408,6 +410,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('compactView').checked = savedView;
     applyView(savedView);
 
+    // Disable search input initially
+    const searchInput = document.getElementById('searchInput');
+    searchInput.disabled = true;
+
     // Login form
     document.getElementById('loginButton').addEventListener('click', login);
 
@@ -430,15 +436,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('settingsModal').style.display = 'flex';
             } else if (action === 'Ulubione') {
                 document.getElementById('favoritesOnly').checked = true;
-                renderContent();
+                updateFavoritesCarousel();
             } else if (action === 'Wyloguj') {
                 userData = null;
                 apiData = null;
-                localStorage.removeItem('contentCache');
-                localStorage.removeItem('contentCacheTimestamp');
                 document.getElementById('contentContainer').style.display = 'none';
                 document.getElementById('loginContainer').style.display = 'flex';
                 document.getElementById('avatar').style.display = 'none';
+                searchInput.disabled = true; // Disable search on logout
             }
         });
     });
@@ -461,14 +466,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('compactView').addEventListener('change', (e) => {
         applyView(e.target.checked);
-        renderContent();
     });
 
-    document.getElementById('favoritesOnly').addEventListener('change', renderContent);
-
-    // Search
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        searchContent(e.target.value);
+    document.getElementById('favoritesOnly').addEventListener('change', () => {
+        updateFavoritesCarousel();
     });
 
     // Close dropdown on outside click

@@ -2,8 +2,8 @@
     --bg-color: #121212;
     --text-color: #ffffff;
     --card-bg: #1e1e1e;
-    --accent-color: #ff2e63;
-    --accent-hover: #ff5c8d;
+    --accent-color: #2e5bff;
+    --accent-hover: #5cb8ff;
     --secondary-bg: rgba(18, 18, 18, 0.95);
     --gradient-overlay: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.8));
 }
@@ -210,7 +210,7 @@ nav {
 }
 
 .login-box button:disabled {
-    background: #b30710;
+    background: #0e017b;
     cursor: not-allowed;
 }
 
