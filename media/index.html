@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kodeń Media</title>
+    <link rel="icon" href="https://via.placeholder.com/32" type="image/png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="logo" role="img" aria-label="Logo Kodeń Media">Kodeń Media</div>
+        <nav role="navigation" aria-label="Główna nawigacja">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Szukaj..." aria-label="Wyszukaj filmy, muzykę, książki lub transmisje na żywo">
+            </div>
+            <div class="avatar" id="avatar" role="button" tabindex="0" aria-label="Menu użytkownika" aria-haspopup="true"></div>
+            <div class="dropdown" id="dropdown" role="menu">
+                <button role="menuitem" aria-label="Profil">Profil</button>
+                <button role="menuitem" aria-label="Ustawienia">Ustawienia</button>
+                <button role="menuitem" aria-label="Wyloguj się">Wyloguj</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="login-container" id="loginContainer" role="main" aria-label="Ekran logowania">
+        <div class="login-box">
+            <h1>Kodeń Media</h1>
+            <input type="text" id="username" placeholder="Login" required aria-label="Nazwa użytkownika">
+            <input type="password" id="password" placeholder="Hasło" required aria-label="Hasło">
+            <button id="loginButton" tabindex="0" aria-label="Zaloguj się">
+                <span>Zaloguj</span>
+                <span class="spinner"></span>
+            </button>
+            <p class="error" id="errorMessage" role="alert" aria-live="assertive"></p>
+        </div>
+    </div>
+
+    <div class="content-container" id="contentContainer" role="main" aria-label="Treści multimedialne">
+        <div class="content-loading" id="contentLoading">
+            <div class="loading-spinner"></div>
+            <div class="progress-bar"><div id="progressBar"></div></div>
+        </div>
+        <div class="section" id="live" role="region" aria-label="Sekcja Transmisje na żywo">
+            <h2>Transmisje na żywo</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="liveContent" tabindex="0" aria-label="Karuzela transmisji na żywo"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="recentlyViewed" role="region" aria-label="Ostatnio oglądane">
+            <h2>Ostatnio oglądane</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="recentlyViewedContent" tabindex="0" aria-label="Karuzela ostatnio oglądanych"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="movies" role="region" aria-label="Sekcja Filmy">
+            <h2>Filmy</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="moviesContent" tabindex="0" aria-label="Karuzela filmów"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="music" role="region" aria-label="Sekcja Muzyka">
+            <h2>Muzyka</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="musicContent" tabindex="0" aria-label="Karuzela muzyki"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="books" role="region" aria-label="Sekcja Książki">
+            <h2>Książki</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="booksContent" tabindex="0" aria-label="Karuzela książek"></div>
+                <div class="carousel-nav">
+                    <button class="carousel-prev" aria-label="Poprzedni element">◄</button>
+                    <button class="carousel-next" aria-label="Następny element">►</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="mediaModal" role="dialog" aria-label="Odtwarzacz multimediów">
+        <div class="modal-content">
+            <h2 id="modalTitle"></h2>
+            <div id="mediaPlayer"></div>
+            <div id="pdfViewerContainer" style="display: none; position: relative;">
+                <div class="loading-overlay" id="pdfLoadingOverlay">
+                    <div class="loading-spinner"></div>
+                </div>
+                <canvas id="pdfViewer"></canvas>
+                <div class="pdf-controls">
+                    <button onclick="previousPage()" aria-label="Poprzednia strona">Poprzednia</button>
+                    <span id="pageInfo"></span>
+                    <button onclick="nextPage()" aria-label="Następna strona">Następna</button>
+                </div>
+            </div>
+            <button class="close-btn" tabindex="0" aria-label="Zamknij odtwarzacz">Zamknij</button>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal" role="dialog" aria-label="Ustawienia">
+        <div class="modal-content settings-modal">
+            <h2>Ustawienia</h2>
+            <div class="theme-grid">
+                <div class="theme-preview theme-dark" data-theme="dark" role="button" aria-label="Motyw ciemny"></div>
+                <div class="theme-preview theme-light" data-theme="light" role="button" aria-label="Motyw jasny"></div>
+                <div class="theme-preview theme-high-contrast" data-theme="high-contrast" role="button" aria-label="Motyw wysokiego kontrastu"></div>
+            </div>
+            <div class="toggle">
+                <label for="compactView">Kompaktowy widok</label>
+                <input type="checkbox" id="compactView" aria-label="Włącz kompaktowy widok">
+            </div>
+            <div class="toggle">
+                <label for="favoritesOnly">Pokaż tylko ulubione</label>
+                <input type="checkbox" id="favoritesOnly" aria-label="Pokaż tylko ulubione elementy">
+            </div>
+            <button class="close-btn" tabindex="0" aria-label="Zamknij ustawienia">Zamknij</button>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal" role="dialog" aria-label="Profil użytkownika">
+        <div class="modal-content profile-modal">
+            <h2>Profil</h2>
+            <form id="profileForm">
+                <label for="profileAvatar">Kolor awatara</label>
+                <input type="color" id="profileAvatar" aria-label="Kolor tła awatara">
+                <button type="submit" aria-label="Zapisz profil">Zapisz</button>
+            </form>
+            <button class="close-btn" tabindex="0" aria-label="Zamknij profil">Zamknij</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div id="searchResults" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+</body>
+</html>
